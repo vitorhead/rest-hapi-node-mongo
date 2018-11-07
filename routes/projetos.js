@@ -69,8 +69,7 @@ module.exports = [
             validate : {
                 payload : Joi.object({
                     nome : Joi.string().min(5).max(20).optional(),
-                    progresso : Joi.number().min(0).max(100).optional(),
-                    dtcriacao : Joi.date().timestamp().optional()
+                    progresso : Joi.number().min(0).max(100).optional()
                 }).required().min(1)      
             }
         },
