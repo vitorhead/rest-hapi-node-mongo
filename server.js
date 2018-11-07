@@ -1,7 +1,7 @@
 'use strict';
 
 const Hapi = require('hapi')
-const MongoJS = require('mongojs')
+const db = require('./database/database.js').db;
 const routes = require('./routes/routes.js')
 
 const server = new Hapi.Server();
@@ -10,8 +10,7 @@ server.connection({
     port : 8081
 });
 
-server.app.db = MongoJS('hapi-rest-mongo', ['projetos'])
-
+server.app.db = db;
 server.route(routes);
 
 server.start(err => {
@@ -20,13 +19,3 @@ server.start(err => {
 
     console.log(`Servidor rodando em ${server.info.uri}`)
 })
-
-// server.register(
-//     routes, 
-//     (err) => {
-//     if (err) throw err;
-
-//     server.start(err => {    
-//         console.log(`Servidor rodando em ${server.info.uri}`)
-//     })
-// })

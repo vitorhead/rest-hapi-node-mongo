@@ -1,13 +1,14 @@
 const Boom = require('boom')
 const uuid = require('node-uuid')
 const Joi = require('joi')
+const Projetos = require('../models/Projetos')
 
 module.exports = [
     {
         method : 'GET',
         path  : '/projetos',
         handler : (request, response) => {
-            request.server.app.db.projetos.find((err, docs) => {
+            Projetos.find((err, docs) => {
                 if (err)
                     return response(Boom.wrap(err, 'Erro interno do MongoDB'))
     
@@ -20,7 +21,7 @@ module.exports = [
         method : 'GET',
         path  : '/projetos/{id}',
         handler : (request, response) => {
-            request.server.app.db.projetos.findOne({_id : request.params.id},
+            Projetos.findOne({_id : request.params.id},
                 (err, doc) => {
                     if (err) 
                         return response(Boom.wrap(err, 'Erro interno do MongoDB'))
@@ -53,7 +54,7 @@ module.exports = [
     
             projeto._id = uuid.v1();
     
-            request.server.app.db.projetos.save(projeto, (err, result) => {
+            Projetos.save(projeto, (err, result) => {
                 if (err)
                     return response(Boom.wrap(err, 'Erro interno do MongoDB'))
                 
@@ -74,7 +75,7 @@ module.exports = [
             }
         },
         handler : (request, response) => {
-            request.server.app.db.projetos.update({_id : request.params.id},
+            Projetos.update({_id : request.params.id},
                 {$set : request.payload},
                 (err, result) => {
                     if (err)
@@ -93,7 +94,7 @@ module.exports = [
         path: '/projetos/{id}',
         handler: (request, response) => {
     
-            request.server.app.db.projetos.remove({
+            Projetos.remove({
                 _id: request.params.id
             }, (err, result) => {
     

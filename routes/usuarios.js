@@ -3,6 +3,7 @@ const uuid = require('node-uuid')
 const Joi = require('joi')
 const bcrypt = require('bcrypt');
 const { promisify } = require('util')
+const Usuarios = require('../models/Usuarios')
 
 const bcryptAsPromise = promisify(bcrypt.hash)
 
@@ -11,7 +12,7 @@ module.exports = [
         method : 'GET',
         path  : '/usuarios',
         handler : (request, response) => {
-            request.server.app.db.usuarios.find((err, docs) => {
+            Usuarios.find((err, docs) => {
                 if (err)
                     return response(Boom.wrap(err, 'Erro interno do MongoDB'))
     
@@ -24,7 +25,7 @@ module.exports = [
         method : 'GET',
         path  : '/usuarios/{id}',
         handler : (request, response) => {
-            request.server.app.db.usuarios.findOne({_id : request.params.id},
+            Usuarios.findOne({_id : request.params.id},
                 (err, doc) => {
                     if (err) 
                         return response(Boom.wrap(err, 'Erro interno do MongoDB'))
@@ -58,15 +59,12 @@ module.exports = [
             if (!usuario.dtcriacao) 
                 usuario.dtcriacao = new Date();
             
-            if (usuario.senha) {
-                usuario.nome = 'abcdefgh'
-                const hashSenha = await bcryptAsPromise(usuario.senha, 10);
-                usuario.senha = hashSenha;
-            }    
-    
+            if (usuario.senha) 
+                usuario.senha = await bcryptAsPromise(usuario.senha, 10);
+            
             usuario._id = uuid.v1();
     
-            request.server.app.db.usuarios.save(usuario, (err, result) => {
+            Usuarios.save(usuario, (err, result) => {
                 if (err)
                     return response(Boom.wrap(err, 'Erro interno do MongoDB'))
                 
@@ -98,7 +96,7 @@ module.exports = [
                 usuario.senha = hashSenha;
             }
 
-            request.server.app.db.usuarios.update({_id : request.params.id},
+            Usuarios.update({_id : request.params.id},
                 {$set : usuario},
                 (err, result) => {
                     if (err)
