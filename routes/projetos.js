@@ -1,7 +1,6 @@
 const Boom = require('boom')
-const uuid = require('node-uuid')
-const Joi = require('joi')
 const Projetos = require('../models/Projetos')
+const { promisify } = require('util')
 
 module.exports = [
     {
@@ -10,10 +9,12 @@ module.exports = [
         handler : (request, response) => {
             Projetos.find((err, docs) => {
                 if (err)
-                    return response(Boom.wrap(err, 'Erro interno do MongoDB'))
+                    return response(Boom.wrap(err, 400, 'Erro ao buscar projetos'))
     
                 response(docs)
             })
+            .sort({dtcriacao : 'asc'})
+            .limit(1)
         }
     }
 ,    
@@ -24,7 +25,7 @@ module.exports = [
             Projetos.findOne({_id : request.params.id},
                 (err, doc) => {
                     if (err) 
-                        return response(Boom.wrap(err, 'Erro interno do MongoDB'))
+                        return response(Boom.wrap(err, 400, 'Erro ao buscar projeto'))
     
                     if (!doc)
                         return response(Boom.notFound())
@@ -38,27 +39,18 @@ module.exports = [
     {
         method : 'POST',
         path : '/projetos',
-        config : {
-            validate : {
-                payload : {
-                    nome : Joi.string().min(5).max(20).required(),
-                    progresso : Joi.number().min(0).max(100).required(),
-                    dtcriacao : Joi.date().timestamp()
-                }      
-            }
-        },
-        handler : (request, response) => {
+        handler : async (request, response) => {
             const projeto = request.payload;
             if (!projeto.dtcriacao) 
                 projeto.dtcriacao = new Date();
     
-            projeto._id = uuid.v1();
-    
-            Projetos.save(projeto, (err, result) => {
+            // const resultProjeto = await promisify(Projetos.save(projeto));
+            // response(resultProjeto);
+            Projetos.create(projeto, (err, doc) => {
                 if (err)
-                    return response(Boom.wrap(err, 'Erro interno do MongoDB'))
+                    return response(Boom.wrap(err, 400, 'Erro ao salvar projeto'));
                 
-                    response(result)
+                return response(doc)
             })
         }
     }
@@ -66,20 +58,12 @@ module.exports = [
     {
         method : 'PATCH',
         path : '/projetos/{id}',
-        config : {
-            validate : {
-                payload : Joi.object({
-                    nome : Joi.string().min(5).max(20).optional(),
-                    progresso : Joi.number().min(0).max(100).optional()
-                }).required().min(1)      
-            }
-        },
         handler : (request, response) => {
             Projetos.update({_id : request.params.id},
                 {$set : request.payload},
                 (err, result) => {
                     if (err)
-                        return response(Boom.wrap(err, 'Erro interno do MongoDB'))
+                        return response(Boom.wrap(err, 400, 'Erro ao salvar projeto'))
                     
                     if (result.n === 0)
                         return response(Boom.notFound())
@@ -99,7 +83,7 @@ module.exports = [
             }, (err, result) => {
     
                 if (err) {
-                    return reply(Boom.wrap(err, 'Erro interno do MongoDB'));
+                    return reply(Boom.wrap(err, 400, 'Erro ao deletar projeto'));
                 }
     
                 if (result.n === 0) {

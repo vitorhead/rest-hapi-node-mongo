@@ -1,6 +1,4 @@
 const Boom = require('boom')
-const uuid = require('node-uuid')
-const Joi = require('joi')
 const bcrypt = require('bcrypt');
 const { promisify } = require('util')
 const Usuarios = require('../models/Usuarios')
@@ -14,7 +12,7 @@ module.exports = [
         handler : (request, response) => {
             Usuarios.find((err, docs) => {
                 if (err)
-                    return response(Boom.wrap(err, 'Erro interno do MongoDB'))
+                    return response(Boom.wrap(err, 400, 'Erro ao buscar usuário'))
     
                 response(docs)
             })
@@ -28,7 +26,7 @@ module.exports = [
             Usuarios.findOne({_id : request.params.id},
                 (err, doc) => {
                     if (err) 
-                        return response(Boom.wrap(err, 'Erro interno do MongoDB'))
+                        return response(Boom.wrap(err, 400, 'Erro ao buscar usuário'))
     
                     if (!doc)
                         return response(Boom.notFound())
@@ -36,39 +34,26 @@ module.exports = [
                     response(doc)
     
                 })
+                .limit(20)
         }
     }
  ,   
     {
         method : 'POST',
         path : '/usuarios',
-        config : {
-            validate : {
-                payload : {
-                    nome : Joi.string().min(5).max(20).required(),
-                    dtcriacao : Joi.date().timestamp(),
-                    email : Joi.string().min(5).max(50).email(),
-                    senha : Joi.string().min(8).max(16).required(),
-                    seguindo : Joi.array().items(Joi.string()),
-                    seguidores : Joi.array().items(Joi.string())
-                }      
-            }
-        },
         handler : async (request, response) => {
             const usuario = request.payload;
             if (!usuario.dtcriacao) 
                 usuario.dtcriacao = new Date();
             
-            if (usuario.senha) 
-                usuario.senha = await bcryptAsPromise(usuario.senha, 10);
-            
-            usuario._id = uuid.v1();
+            if (usuario.password) 
+                usuario.password = await bcryptAsPromise(usuario.password, 10);
     
-            Usuarios.save(usuario, (err, result) => {
+            Usuarios.create(usuario, (err, doc) => {
                 if (err)
-                    return response(Boom.wrap(err, 'Erro interno do MongoDB'))
+                    return response(Boom.wrap(err, 400, 'Erro ao criar usuário'))
                 
-                    response(result)
+                return response(doc)
             })
         }
     }
@@ -76,31 +61,17 @@ module.exports = [
     {
         method : 'PATCH',
         path : '/usuarios/{id}',
-        config : {
-            validate : {
-                payload : Joi.object({
-                    nome : Joi.string().min(5).max(20).optional(),
-                    email : Joi.string().min(5).max(50).email(),
-                    senha : Joi.string().min(8).max(16).optional(),
-                    seguindo : Joi.array().items(Joi.string()).optional(),
-                    seguidores : Joi.array().items(Joi.string()).optional()
-                }).required().min(1)      
-            }
-        },
         handler : async (request, response) => {
             const usuario = request.payload;
 
-            if (usuario.senha) {
-                usuario.nome = 'abcdefgh'
-                const hashSenha = await bcryptAsPromise(usuario.senha, 10);
-                usuario.senha = hashSenha;
-            }
+            if (usuario.password) 
+                usuario.password = await bcryptAsPromise(usuario.password, 10);
 
-            Usuarios.update({_id : request.params.id},
+            Usuarios.updateOne({_id : request.params.id},
                 {$set : usuario},
                 (err, result) => {
                     if (err)
-                        return response(Boom.wrap(err, 'Erro interno do MongoDB'))
+                        return response(Boom.wrap(err, 'Erro ao salvar usuário'))
                     
                     if (result.n === 0)
                         return response(Boom.notFound())
