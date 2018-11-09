@@ -16,16 +16,49 @@ const Schema = mongoose.Schema;
 
 const UsuariosSchema = new Schema({
     name: {
-        type: String
+        type: String,
+        required: true
     },
     email: {
         type: String,
         unique: true
     },
+    photo: {
+        type: String,
+        required: true
+    },
     password: {
         type: String,
         select: false
-    }
+    },
+    followers: [{
+        usuarioid: {
+            type: Schema.Types.ObjectId,
+            ref: 'Usuarios'
+        },
+        name: {
+            type: String,
+            required: true
+        },
+        photo: {
+            type: String,
+            required: true
+        }
+    }],
+    following: [{
+        usuarioid: {
+            type: Schema.Types.ObjectId,
+            ref: 'Usuarios'
+        },
+        name: {
+            type: String,
+            required: true
+        },
+        photo: {
+            type: String,
+            required: true
+        }
+    }]
 })
 
 module.exports = mongoose.model('Usuarios', UsuariosSchema);
