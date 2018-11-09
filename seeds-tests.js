@@ -104,12 +104,12 @@ async function setup() {
 
 async function setupInc() {
     console.time('setupInc')
-    const sample = []
+    const samples = []
     for (let i = 0; i < 1000; i++) {
         const userInc = {
             name: "usuario inc " + i,
             email: "usuario" + i + "@asgard.com",
-            photo: 'vazio',
+            photo: 'https://www.ctrlzeta.com.br/wp-content/uploads/2016/05/tumblr_nyjbeuPVnn1umwwcgo1_r1_1280.png',
             password: "oi123456",
             // following : [],
             // followers : [{
@@ -147,7 +147,10 @@ async function setupInc() {
             samplePosts.push(postInc)
         }
 
-        sample.push({ usuario: userInc, projeto: projInc, posts: samplePosts })
+        samples.push({ usuario: userInc, projeto: projInc, posts: samplePosts })
     }
+
+    //comentarios
+    for
     console.timeEnd('setupInc')
 }

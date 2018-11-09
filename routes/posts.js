@@ -120,6 +120,60 @@ module.exports = [
     }
     ,
     {
+        method: 'POST',
+        path: '/posts/{id}/comentarios',
+        handler: (request, response) => {
+            Posts.update({ _id: request.params.id },
+                { $push: { comentarios: request.payload } },
+                (err, result) => {
+                    if (err)
+                        return response(Boom.wrap(err, 400, 'Erro ao salvar comentário da postagem'))
+
+                    if (result.n === 0)
+                        return response(Boom.notFound())
+
+                    response().code(204);
+                })
+        },
+        config: {
+            validate: {
+                payload: {
+                    texto: Joi.string().min(2).max(400).required(),
+                    usuario: Joi.object().keys({
+                        _id: Joi.string().required().min(10),
+                        nome: Joi.string().required().min(5),
+                        photo: Joi.string().required().min(3).max(200)
+                    }),
+                }
+            }
+        }
+    }
+    ,
+    {
+        method: 'GET',
+        path: '/posts/{id}/comentarios',
+        handler: (request, response) => {
+            const { ignorar, limitar } = request.query
+            const postId = request.params.id
+            Posts.find({ _id: postId }, (err, doc) => {
+                if (err)
+                    return response(Boom.wrap(err, 400, 'Erro ao buscar postagens'))
+
+                const comentarios = doc[0].comentarios.splice(ignorar, limitar)
+                response(comentarios)
+            })
+        },
+        config: {
+            validate: {
+                query: {
+                    ignorar: Joi.number().integer().min(0).default(0),
+                    limitar: Joi.number().integer().min(1).default(10)
+                }
+            }
+        }
+    }
+    ,
+    {
         method: 'DELETE',
         path: '/posts/{id}',
         handler: (request, response) => {
