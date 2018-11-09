@@ -30,35 +30,35 @@ const UsuariosSchema = new Schema({
     password: {
         type: String,
         select: false
-    },
-    followers: [{
-        usuarioid: {
-            type: Schema.Types.ObjectId,
-            ref: 'Usuarios'
-        },
-        name: {
-            type: String,
-            required: true
-        },
-        photo: {
-            type: String,
-            required: true
-        }
-    }],
-    following: [{
-        usuarioid: {
-            type: Schema.Types.ObjectId,
-            ref: 'Usuarios'
-        },
-        name: {
-            type: String,
-            required: true
-        },
-        photo: {
-            type: String,
-            required: true
-        }
-    }]
+    }
+    // followers: [{
+    //     usuarioid: {
+    //         type: Schema.Types.ObjectId,
+    //         ref: 'Usuarios'
+    //     },
+    //     name: {
+    //         type: String,
+    //         required: true
+    //     },
+    //     photo: {
+    //         type: String,
+    //         required: true
+    //     }
+    // }],
+    // following: [{
+    //     usuarioid: {
+    //         type: Schema.Types.ObjectId,
+    //         ref: 'Usuarios'
+    //     },
+    //     name: {
+    //         type: String,
+    //         required: true
+    //     },
+    //     photo: {
+    //         type: String,
+    //         required: true
+    //     }
+    // }]
 })
 
 module.exports = mongoose.model('Usuarios', UsuariosSchema);

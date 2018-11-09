@@ -158,9 +158,14 @@ module.exports = [
             Posts.find({ _id: postId }, (err, doc) => {
                 if (err)
                     return response(Boom.wrap(err, 400, 'Erro ao buscar postagens'))
+                if (doc[0]) {
+                    const comentarios = doc[0].comentarios.splice(ignorar, limitar)
+                    response(comentarios)
+                }
+                else {
+                    response(Boom.notFound())
+                }
 
-                const comentarios = doc[0].comentarios.splice(ignorar, limitar)
-                response(comentarios)
             })
         },
         config: {

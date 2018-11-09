@@ -81,4 +81,42 @@ module.exports = [
                 })
         }
     }
+    ,
+    {
+        method: 'PATCH',
+        path: '/usuarios/seguir',
+        handler: (request, response) => {
+            /*
+                payload:
+                follower : {
+                    _id : '',
+                    name : '',
+                    photo : ''
+                },
+                followed : {
+                    _id : '',
+                    name : '',
+                    photo : ''
+                }                
+            */
+            const { follower } = request.payload
+            const { followed } = request.payload
+
+            Usuarios.updateOne({ _id: follower._id },
+                {
+                    $push: {
+                        following: followed
+                    }
+                })
+
+            Usuarios.updateOne({ _id: followed._id },
+                {
+                    $push: {
+                        followers: followed
+                    }
+                })
+
+        }
+
+    }
 ]

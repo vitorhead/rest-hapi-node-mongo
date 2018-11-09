@@ -16,10 +16,19 @@ var PostsSchema = new Schema({
         min: [0, "O mínimo de curtidas é 0!"],
         default: 0
     },
-    usuarioid: {
-        type: Schema.Types.ObjectId,
-        ref: 'Usuarios',
-        required: true
+    usuario: {
+        name: {
+            type: String,
+            required: true
+        },
+        photo: {
+            type: String,
+            required: true
+        },
+        _id: {
+            type: Schema.Types.ObjectId,
+            ref: 'Usuarios'
+        }
     },
     projetoid: {
         type: Schema.Types.ObjectId,

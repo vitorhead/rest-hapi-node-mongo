@@ -1,20 +1,9 @@
-
-/*
-
-    TODO
-        curtir projetos
-        projetos mais curtidos globalmente
-        area do usuario (arq e urbanismo)
-
-        se o usuario mudar o nome, tem q dar update nos projetos e posts q tem o usuario tb
-
-*/
-
-
 const Mongoose = require('mongoose');
 const Usuarios = require('./models/Usuarios')
 const Projetos = require('./models/Projetos')
 const Posts = require('./models/Posts')
+const Seguidores = require('./models/Seguidores')
+const Seguindo = require('./models/Seguindo')
 
 Mongoose.connect('mongodb://localhost:27017/hapijsmongo', { useNewUrlParser: true });
 const db = Mongoose.connection;
@@ -111,19 +100,15 @@ async function setupInc() {
             email: "usuario" + i + "@asgard.com",
             photo: 'https://www.ctrlzeta.com.br/wp-content/uploads/2016/05/tumblr_nyjbeuPVnn1umwwcgo1_r1_1280.png',
             password: "oi123456",
-            // following : [],
-            // followers : [{
-            //     name : 'thor',
-            //     photo : 'qwerqwerq'
-            // }]
+
         }
         const resultUser = await Usuarios.create(userInc)
         userInc._id = resultUser._id
 
-
         const projInc = {
             nome: "projeto inc " + i,
             dtcriacao: new Date(),
+            descricao: "meu projeto descricao " + i,
             usuarioid: userInc._id,
             progresso: 0,
             qtcurtidas: Math.floor(Math.random() * 100000) + 1
@@ -134,7 +119,7 @@ async function setupInc() {
         const samplePosts = []
         for (let y = 0; y < 10; y++) {
             const postInc = {
-                usuarioid: userInc._id,
+                usuario: userInc,
                 projetoid: projInc._id,
                 dtcriacao: new Date(),
                 descricao: `olha o post aee ${i + y}`,
@@ -150,7 +135,36 @@ async function setupInc() {
         samples.push({ usuario: userInc, projeto: projInc, posts: samplePosts })
     }
 
-    //comentarios
-    for
+    //comentarios do post
+    // let sample = samples[0]
+    // console.log(sample.posts[Math.floor(Math.random() * 9) + 1]._id)
+    // console.log(sample.posts[Math.floor(Math.random() * 9) + 1])
+    for (sample of samples) {
+        Posts.update({ _id: sample.posts[Math.floor(Math.random() * 9) + 1]._id },
+            {
+                $push: {
+                    comentarios: {
+                        usuario: sample.usuario,
+                        texto: "comentario random"
+                    }
+                }
+            },
+            (err, doc) => { })
+
+    }
+
+    Seguindo.create({
+        _id: samples[0].usuario._id,
+        seguindo: [samples[1].usuario._id]
+    },
+        (error, doc) => {
+            console.log('seguindo id', doc)
+        })
+
+    Seguidores.create({
+        _id: samples[1].usuario._id,
+        seguidores: [samples[0].usuario._id]
+    })
+
     console.timeEnd('setupInc')
 }

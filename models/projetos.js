@@ -7,6 +7,11 @@ var ProjetosSchema = new Schema({
         trim: true,
         required: true
     },
+    descricao: {
+        type: String,
+        trim: true,
+        required: true
+    },
     dtcriacao: {
         type: Date,
         required: true
